@@ -22,14 +22,6 @@ matrix:
         - ANALYZE=false
         - PYTHON=python2
     - os: linux
-      compiler: gcc
-      env: ANALYZE=true
-    - os: linux
-      compiler: gcc
-      env: DOCKER=true
-      services:
-        - docker
-    - os: linux
       compiler: clang
       env:
         - ANALYZE=false
@@ -39,12 +31,6 @@ matrix:
       env:
         - ANALYZE=false
         - PYTHON=python3
-    - os: linux
-      compiler: clang
-      env: ANALYZE=true
-    - os: linux
-      compiler: clang
-      env: FUZZER=true
     - os: osx
       compiler: clang
       # disable homebrew auto update which takes a lot of time
@@ -52,7 +38,35 @@ matrix:
       cache:
         directories:
           - $HOME/Library/Caches/Homebrew
-
+    - os: linux
+      compiler: gcc
+      env: ANALYZE=true
+    - os: linux
+      compiler: clang
+      env: ANALYZE=true
+    - os: linux
+      compiler: clang
+      env: FUZZER=true
+    - os: linux
+      compiler: gcc
+      env: DOCKER=true
+      services:
+        - docker
+    - os: linux
+      compiler: gcc
+      addons:
+        sonarcloud:
+          organization: open62541
+          token:
+            secure: "lScgz6pHN+v3cv+ZZYIFng1qHF2BgrlIUNe9uWPuoJ8NEBP54Kop4f/c8t0kVyswqVCgg9mD7GhBHtVqCRkwfEfLw9jOj5P/Wn3CZ4Ip3JuqKlcX3WkNQU4R5olQJKtpqxF4l/NQ4OZegofr+us8ci2iZjustfH0b9nULOTRXsGwQR/9kvunsLGXzuHrgRY8qqwYORkyHaJQVbkJroRNqkZrNFKzDdj0pnL2jKpPJ5lzRhow2Pu+82/PfkrL1K8j4A3fjuyInf9xgB16Z7lsDD3i2IJ3OzhHREoV+Hl3G1NTx/fbkUKd4YoMQLEZKZ76j+D7RoHTyWT33zxO0qoEBbAbpKMMAU9K5OheuaKswh6d4JpwT3lf1CLaTA80uCRJkVNropWMi1ZDysdv6iZCVOOpBPURfamNwD5zmiG7pgyRKjhmbY703D6neqJBT8+AN9cZclE3DuDLyca19883ZCJ7egtPZDTd2zIsIkYCw98vcZK3byQsiJs5XDixGoq4aT76no6OO3rUkLi25RmIecioSf1BObOM8lESZ9V8qzlOLQrQchR0GtYC7Tuc6zUwktMffBy+b1D2vreUQMibFi9B+BWlUhrWHm1qNZ8QrvAU/ZA8AftbhBLmszdKueu9Nmy7IoN7qiog44a8eOmHd6MGsFcQk5pbYmT5KMSOFbc="
+        branches:
+          - master
+      env:
+        - SONAR=true
+        - PYTHON=python2
+      cache:
+        directories:
+          - '$HOME/.sonar/cache'
 addons:
   apt:
     sources:
@@ -98,7 +112,6 @@ cache:
 
 # combine all the commands into one single command. See https://github.com/travis-ci/travis-ci/issues/1066
 before_install: |
- set -e
  # Exit travis if on coverity_scan branch and not first build
  test $TRAVIS_BRANCH != coverity_scan -o ${TRAVIS_JOB_NUMBER##*.} = 1 || exit 0
  if [ ${TRAVIS_OS_NAME} == "linux" ]; then echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-; fi
@@ -106,7 +119,6 @@ before_install: |
  if [ ${TRAVIS_OS_NAME} == "osx" ]; then sh ./tools/travis/travis_osx_before_install.sh; fi
 
 script: |
- set -e
  if [ ${TRAVIS_OS_NAME} == "linux" ]; then sh ./tools/travis/travis_linux_script.sh; fi
  if [ ${TRAVIS_OS_NAME} == "osx" ]; then sh ./tools/travis/travis_osx_script.sh; fi
 
