@@ -9,7 +9,7 @@ if ! [ -z ${SONAR+x} ]; then
     -DCMAKE_BUILD_TYPE=Debug -DUA_BUILD_EXAMPLES=ON -DUA_ENABLE_DISCOVERY=ON -DUA_ENABLE_DISCOVERY_MULTICAST=ON .. \
     && make -j
 	cd ..
-	sonar-scanner
+	sonar-scanner -Dsonar.login=$SONAR_TOKEN
 	exit 0
 fi
 
